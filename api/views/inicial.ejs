@@ -117,13 +117,13 @@
 
      
       <div id="titulo" class="titulo">
-        <p class="titulo">OFERTA</p>
+        <p id="titulotexto" class="titulo">OFERTA</p>
       </div>
 
-      <div id="oferta" class="oferta">
-        <p class="produto">LANCHE</p>
-        <p class="subproduto">HUMBUGUER, QUEIJO, BACON</p>
-        <p class="valor">R$ 13,50</p>
+      <div  id="oferta" class="oferta">
+        <p id="produto" class="produto"></p>
+        <p id="subproduto"class="subproduto"></p>
+        <p id="valor" class="valor"></p>
       </div>
 
        
@@ -197,6 +197,40 @@ socket.on('serial:data',function(dataSerial){
     console.log("atualizou!")
   document.getElementById("valor").innerHTML = valorSerial;
    }, 10000); */
+
+
+
+</script>
+
+<script>
+
+async function buscandoPromocoes(){
+     
+  let resposta = await fetch('./adm/listagem', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },      
+    })
+
+    let resultado = await resposta.json()
+
+    console.log(resultado[0].nome)
+
+    for (let i=0; i<=10; i++) {
+    setTimeout(() => {
+        document.getElementById("titulotexto").innerHTML = resultado[i].titulo;
+        document.getElementById("produto").innerHTML = resultado[i].produto;
+        document.getElementById("subproduto").innerHTML = resultado[i].subproduto;
+        document.getElementById("valor").innerHTML = "R$ " + resultado[i].valor;
+
+    }, 1000 * i);
+  }
+
+      
+}
+buscandoPromocoes()
 
 
 

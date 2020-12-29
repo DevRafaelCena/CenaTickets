@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <script language="javascript" src="/public/javascripts/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css"/> 
+    
+   <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Modulo de Administração</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          <li class="nav-item active">
+            <a class="nav-link" aria-current="page" href="#">Promoções</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Configurações</a>
+          </li>
+          
+        </ul>
+        
+      </div>
+    </div>
+  </nav>
+</header>
+<style>
+  .titulo{
+    padding-top: 20px;
+  }
+  .padding{
+    margin-top: 20px;
+  }
+</style>
+
+
+<body>
+<!-- Begin page content -->
+<main class="flex-shrink-0">
+  <div class="container">
+    <h1 class="mt-5 titulo">Cadastro de Promoções para o sistema de Tickets</h1>
+      
+    <table class="table table-bordered padding">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Nome</th>
+          <th scope="col">Titulo</th>
+          <th scope="col">Produto</th>
+          <th scope="col">SubProduto</th>
+          <th scope="col">Valor</th>
+          <th scope="col">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% lista.forEach(lista => {  %>
+    
+          <tr value="<%= lista.id %>">
+          <th scope="row"><%= lista.id %></th>
+          <td><%= lista.nome %></td>
+          <td><%= lista.titulo %></td>
+          <td><%= lista.produto %> </td>
+          <td><%= lista.subproduto  %></td>
+          <td><%= lista.valor  %></td>
+          <td><button class="btn btn-secondary">Editar</button>
+            <button class="btn btn-danger">Apagar</button> </td>
+        </tr>
+        <% }); %>
+       
+      </tbody>
+    </table>
+
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Novo</button>
+
+
+
+
+
+    
+  </div>
+</main>
+
+<footer class="footer mt-auto py-3 bg-light">
+  <div class="container">
+    <span class="text-muted">Desenvolvido por Cena Tecnologia </span>
+  </div>
+</footer>
+
+
+
+  </body>
+
+  <!-- Modal cadastro-->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Nova promoção</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form method="post" onsubmit="validarCampos(this); return false;" >
+          <div class="form-group">
+            <label for="recipient-name" class="col-form-label">Nome:</label>
+            <input type="text" class="form-control" name="nome" id="nome">
+
+            <label for="recipient-titulo" class="col-form-label">Titulo:</label>
+            <input type="text" class="form-control" name="titulo" id="titulo">
+
+            <label for="recipient-produto" class="col-form-label">Produto:</label>
+            <input type="text" class="form-control" name="produto" id="produto">
+
+            <label for="recipient-subProduto" class="col-form-label">SubProduto:</label>
+            <input type="text" class="form-control" name="subproduto" id="subproduto">
+
+            <label for="recipient-valor" class="col-form-label">Valor:</label>
+            <input type="text" class="form-control" name="valor" id="valor">
+          </div>
+                
+
+         </div>
+         <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+          <button id="btnSalvar" type="submit" class="btn btn-primary">Gravar</button>
+        </div>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<script src="/javascripts/jquery.min.js"></script>
+<script  src="/javascripts/bootstrap.min.js"></script>
+
+<!-- <script>
+  $('#btnSalvar').on('click', async () => {
+    let modal = $('#exampleModal')
+
+    // Recuperar o id do morador
+    let nome = modal.find('#nome').val()
+    console.log(nome)
+
+  })
+</script> -->
+<script>
+  async function validarCampos(){
+    let modal = $('#exampleModal')
+    let nome = modal.find('#nome').val()
+    let titulo = modal.find('#titulo').val()
+    let produto = modal.find('#produto').val()
+    let subproduto = modal.find('#subproduto').val()
+    let valor = modal.find('#valor').val()
+
+
+    if(nome ==''){
+      alert("Preencha o Nome")
+      return false
+    }
+    if(titulo ==''){
+      alert("Preencha o Titulo")
+      return false
+    }
+    if(produto ==''){
+      alert("Preencha o Produto")
+      return false
+    }
+
+    let resposta = await fetch(window.location.href + '/novapromocao', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+       nome,
+       titulo,
+       produto,
+       subproduto,
+       valor
+      })
+    })
+
+    let resultado = await resposta.json()
+
+    if(resposta.status == 200){
+      alert("Dados salvo com sucesso!")
+      window.location.reload();
+
+    }else{
+      alert("Ocorreu um erro tente novamente")
+    }
+
+    return false
+
+
+   
+    
+  }
+</script>
+
+
+
+</html>
