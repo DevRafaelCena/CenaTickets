@@ -1,0 +1,14 @@
+{
+    "ENTRADA": "COM8",
+    "SAIDA": "COM5",
+    "IMPRESSORA" : "",
+    "TEMPOGIROHORARIO" : "10000",
+    "TEMPOANTGIROHORARIO" : "5000",
+     "TIPO": 1,
+     "INTEGRADOR" : 1,
+     "PROTOCOLO"  : 1,   
+     "COMENTARIOS" : "TIPO: 1 = CATRACA , 2 = CANCELA ---- INTEGRADOR: 1 = SQG , 2 = DATAMAXI ---- PROTOCOLO: 1= MZ5, 2 = RASPBERRY"
+
+  }
+
+  

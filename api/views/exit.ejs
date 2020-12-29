@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <script language="javascript" src="/public/javascripts/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css"/>
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+   <button class="btn btn-primary" >teste</button>
+
+    <input autofocus id="ticket" type="text" name="Com Foco" placeholder="Com foco">
+
+
+
+  </body>
+
+
+<script>
+
+const inputTicket = document.getElementById('ticket');
+inputTicket.addEventListener('keyup', function(e){
+  var valor = this.value
+  var key = e.which || e.keyCode;
+  if (key == 13) { // codigo da tecla enter
+    // colocas aqui a tua função a rodar
+    alert('carregou enter o valor digitado foi: ' +this.value);
+    var myHeaders = new Headers();
+        var myInit = { method: 'GET',
+                      headers: myHeaders,
+                      mode: 'cors',
+                      cache: 'default' };
+
+    
+  
+/* 
+    var myHeaders = new Headers();
+        var myInit = { method: 'GET',
+                      headers: myHeaders,
+                      mode: 'cors',
+                      cache: 'default' };
+
+        fetch('http://localhost:3000/exit/' + this.value,myInit)
+        .then(function(response) {
+          console.log("teste1")
+          return   document.getElementById('ticket').value='foi';;
+        })
+        .then(function() {
+          document.getElementById('ticket').value='foi2';
+          console.log("teste2")
+        }); */     
+
+  fetch('http://localhost:3000/exit/' + this.value,myInit)
+  .then(function (response) {
+    console.log("ok")
+   ticket = valor;
+   console.log(typeof(ticket));
+
+    if(ticket == '10'){
+
+    const utterance = new SpeechSynthesisUtterance()
+    utterance.text ="Obrigado, e volte sempre!"
+    utterance.lang ="pt-BR"
+    utterance.rate = 2;
+    speechSynthesis.speak(utterance)
+  }else{
+    const utterance = new SpeechSynthesisUtterance()
+    utterance.text ="Ticket não localizado, retorne ao caixa!"
+    utterance.lang ="pt-BR"
+    utterance.rate = 2;
+    speechSynthesis.speak(utterance)
+  }
+
+  }).catch(function (error) {
+        console.log("Tratar erro de conexão")
+        console.log(error);
+      })
+      .then(function (response) {
+        // always executed
+        console.log("sempre executa")
+        document.getElementById('ticket').value=''
+      });
+  }
+});
+
+
+
+</script>
+
+</html>
