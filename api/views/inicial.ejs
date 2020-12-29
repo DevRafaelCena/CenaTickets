@@ -4,7 +4,7 @@
   <head>
     <title><%= title %></title>
    
-    <script language="javascript" src="/public/javascripts/bootstrap.min.js"></script>
+    
     <link rel="stylesheet" href="/stylesheets/bootstrap.min.css"/>
     <style>
 
@@ -137,7 +137,6 @@
 
 </div>
 
-
 <div style="height: 10vh;" class="footer"> 
   <div class="row">
     <div class="col-2 nopadding">
@@ -156,8 +155,13 @@
 </div>
 
 </div>
+<script src="/javascripts/jquery.min.js"></script>
+<script  src="/javascripts/bootstrap.min.js"></script>
 
+<script src="/socket.io/socket.io.js"></script>
 <script>
+   const utterance = new SpeechSynthesisUtterance()
+  const socket = io();
 /*   var arquivo = arquivo.lista
   
   var video = document.querySelector("#movie")
@@ -165,6 +169,34 @@
       var video2 = document.querySelector("#movie2")
       video2.setAttribute("src", arquivo )
  */
+
+
+let counter =2; //contator tempo
+var valorSerial =''
+socket.on('serial:data',function(dataSerial){
+    console.log("recebendo do backend : " + dataSerial.value)
+    valorSerial = dataSerial.value
+    if(valorSerial == "IMPRESSAO"){
+  console.log("é igual")
+ 
+    utterance.text ="Seja bem vindo a Padaria. Utilize a Máscara"
+    utterance.lang ="pt-BR"
+    utterance.rate = 2;
+    speechSynthesis.speak(utterance)
+  }
+
+   
+    socket.on('disconnect', () => {
+  console.log("descoenctou? : " + socket.connected);
+
+
+    })
+})
+
+  /* setInterval(function(){ 
+    console.log("atualizou!")
+  document.getElementById("valor").innerHTML = valorSerial;
+   }, 10000); */
 
 
 

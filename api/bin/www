@@ -3,7 +3,8 @@
 /**
  * Module dependencies.
  */
-
+ 
+const socketIo = require("socket.io")
 var app = require('../app');
 var debug = require('debug')('api:server');
 var http = require('http');
@@ -28,6 +29,191 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+//instanciando io socket e começo da logica conexão porta com. 
+
+const io = require('socket.io')(server)
+
+
+  io.emit('serial:data',{
+    value: "TESTE"  })
+
+
+
+
+
+io.sockets.on('connection', function(socket){
+  console.log('conexão realiza')
+ 
+  console.log(io.sockets.server.engine.clientsCount);
+
+  socket.on('btnAction',function(btn){
+    var dadoweb = btn.value
+    console.log("dadoweb : " + dadoweb)
+   
+    console.log(io.sockets.server.engine.clientsCount);
+
+    if(dadoweb ==="a"){
+      console.log("enviou dado")
+     
+    }else{
+    
+      console.log("enviou dado")
+      
+    }
+    socket.disconnect(true)
+        })   
+
+   })
+
+
+//logica tickets for development
+
+const Imprimir = require('../controllers/imprimirCOM');
+
+var path = require( 'path' );
+const SerialPort = require('serialport')
+const Readline = require('@serialport/parser-readline')
+
+var fs = require("fs");      
+var com1 =''
+
+const config = fs.readFileSync("./Config.json" , "utf8", )
+console.log(config)
+var jsonData = JSON.parse(config); 
+
+com1 = jsonData
+
+
+
+console.log(com1.ENTRADA)
+
+
+//Conectando na ENTRADA 
+if(com1.ENTRADA != ''){
+
+ function Conecta(){
+  const libera = '0;2;1;\r' 
+
+  var port = new SerialPort(com1.ENTRADA, {
+    baudRate: 115200,
+    dataBits: 8,
+    parity: 'none',
+    stopBits: 1,
+    flowControl: false,
+    autoOpen:true
+  })   
+  const parser = port.pipe(new Readline({ delimiter: '\r' }))
+   console.log('conectando COM ENTRADA ...')
+    port.on('open',(err) => {
+      if (err) {
+        console.log("deu erro ao conectar COM ENTRADA: " + err)
+        statusCom1 = 1
+      }else{     
+      port.write(libera)
+      console.log('conectado COM ENTRADA')
+          
+    }});
+
+    parser.on('data', function (data){
+      console.log("recebeu algo COM ENTRADA : " + data )  
+      if(data === '0;14;1;'){     
+      Imprimir.Gerar()
+      io.emit('serial:data',{
+        value: "IMPRESSAO"  })
+      setTimeout(function(){
+        port.write(libera)
+      },3000) 
+        
+      }
+    })  
+    
+  port.on('close', function(){
+    console.log("COM ENTRADA desconectado")
+    port.close(error => {console.log("COM ENTRADA : " +error)})
+    Conecta()
+  
+  })
+  
+  port.on('error', (err) => {
+    Conecta()
+    console.log("COM ENTRADA desconectado : " + err)}
+  )
+  }
+
+ Conecta()
+ 
+}
+
+if(com1.SAIDA != '') {
+  erro = 1
+  function ConectaSAIDA(){
+    const libera = '0;1;1;\r' 
+  
+    var port2 = new SerialPort(com1.SAIDA, {
+      baudRate: 9600,
+      dataBits: 8,
+      parity: 'none',
+      stopBits: 1,
+      flowControl: false,
+      autoOpen:true
+    })   
+    const parser2 = port2.pipe(new Readline({ delimiter: '\r' }))
+     console.log('conectando COM SAIDA ...')
+     port2.on('open',(err) => {
+        if (err) {
+          console.log("Erro ao Conectar COM SAIDA : " + err)
+          
+        }else{     
+        port2.write(libera)
+        console.log('conectado COM SAIDA')
+            
+      }});
+  
+      parser2.on('data', function (data){
+        console.log("recebeu algo COM SAIDA : " + data )  
+       
+      })  
+      
+    port2.on('close', function(){
+      console.log("COM SAIDA : Desconectado")
+      port2.close(error => {console.log("COM SAIDA : " +error)})
+      ConectaSAIDA()  
+    
+    })
+    
+    
+    port2.on('error', (err) => {
+     
+      ConectaSAIDA()      
+      
+        console.log("COM SAIDA desconectado : " + err)
+
+    
+     } )}
+    
+  
+   ConectaSAIDA()
+
+}
+/* //const portaImpressora = new SerialPort('COM12')
+
+var portaImpressora = new SerialPort('COM12', {
+  baudRate: 115200  
+})   
+  
+portaImpressora.on('open', (err) => {
+  if(err) console.log("deu erro ao conectar : " + err)
+  const imprimir = 'TeSTANDOOOOO'
+  portaImpressora.write(imprimir)
+}) */
+
+
+
+
+
+
+
 
 /**
  * Normalize a port into a number, string, or false.
