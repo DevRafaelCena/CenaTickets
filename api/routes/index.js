@@ -17,11 +17,17 @@ router.get('/inicial', function(req, res, next) {
   res.render('inicial', { title: 'Inicial' });
 });
 
+router.get('/adm/config', function(req, res, next) {
+  res.render('admConfig', { title: 'Configurações' });
+});
+
 /* router.get('/adm', function(req, res, next) {
   res.render('adm', { title: 'Administração' });
 }); */
 router.get('/adm',Promocoes.Lista);
 router.get('/adm/listagem',Promocoes.ListaPromocoes);
+router.put('/adm/editapromocao/:id',Promocoes.Edit);
+router.delete('/adm/deletapromocao/:id',Promocoes.Delete);
 router.post('/adm/novapromocao',Promocoes.Send);
 
 

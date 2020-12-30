@@ -30,42 +30,29 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
+
 //instanciando io socket e começo da logica conexão porta com. 
 
 const io = require('socket.io')(server)
-
-
   io.emit('serial:data',{
     value: "TESTE"  })
-
-
-
-
-
+    /*  
 io.sockets.on('connection', function(socket){
-  console.log('conexão realiza')
- 
+  console.log('conexão realizada com a web') 
   console.log(io.sockets.server.engine.clientsCount);
-
-  socket.on('btnAction',function(btn){
+ socket.on('btnAction',function(btn){
     var dadoweb = btn.value
-    console.log("dadoweb : " + dadoweb)
-   
+    console.log("dadoweb : " + dadoweb)   
     console.log(io.sockets.server.engine.clientsCount);
-
     if(dadoweb ==="a"){
-      console.log("enviou dado")
-     
-    }else{
-    
-      console.log("enviou dado")
-      
+      console.log("enviou dado")     
+    }else{    
+      console.log("enviou dado")      
     }
     socket.disconnect(true)
         })   
 
-   })
-
+   }) */
 
 //logica tickets for development
 
@@ -88,13 +75,14 @@ com1 = jsonData
 
 console.log(com1.ENTRADA)
 
+Imprimir.SaidaDatamaxi()
+
 
 //Conectando na ENTRADA 
 if(com1.ENTRADA != ''){
 
  function Conecta(){
   const libera = '0;2;1;\r' 
-
   var port = new SerialPort(com1.ENTRADA, {
     baudRate: 115200,
     dataBits: 8,
@@ -114,18 +102,33 @@ if(com1.ENTRADA != ''){
       console.log('conectado COM ENTRADA')
           
     }});
-
-    parser.on('data', function (data){
-      console.log("recebeu algo COM ENTRADA : " + data )  
-      if(data === '0;14;1;'){     
-      Imprimir.Gerar()
-      io.emit('serial:data',{
-        value: "IMPRESSAO"  })
+    var timestamp = 1
+    var timeout = 0    
+    parser.on('data', function (data){        
+      timestamp = new Date().getTime(); 
+        if(data === '0;14;1;' && timestamp >= timeout  ){           
+             timeout = timestamp + 20000
+          let data = new Date().getTime();
+         console.log(data)        
+         
+          if(com1.INTEGRADOR == 1){
+        Imprimir.GerarSQG()
+       
+      }else{
+        Imprimir.GerarDatamaxi()
+       
+      } 
       setTimeout(function(){
         port.write(libera)
       },3000) 
+       io.emit('serial:data',{
+          value: "IMPRESSAO"  })
         
-      }
+          
+        }
+
+  
+     
     })  
     
   port.on('close', function(){

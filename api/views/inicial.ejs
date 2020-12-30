@@ -218,19 +218,23 @@ async function buscandoPromocoes(){
 
     console.log(resultado[0].nome)
 
-    for (let i=0; i<=10; i++) {
+    for (let i=0; i<=resultado.length; i++) {
     setTimeout(() => {
         document.getElementById("titulotexto").innerHTML = resultado[i].titulo;
         document.getElementById("produto").innerHTML = resultado[i].produto;
         document.getElementById("subproduto").innerHTML = resultado[i].subproduto;
         document.getElementById("valor").innerHTML = "R$ " + resultado[i].valor;
 
-    }, 1000 * i);
+    }, 10000 * i);
   }
 
       
 }
-buscandoPromocoes()
+setInterval(()=>{
+  buscandoPromocoes()
+
+},20000)
+
 
 
 

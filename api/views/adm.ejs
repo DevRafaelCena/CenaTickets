@@ -40,12 +40,11 @@
 <!-- Begin page content -->
 <main class="flex-shrink-0">
   <div class="container">
-    <h1 class="mt-5 titulo">Cadastro de Promoções para o sistema de Tickets</h1>
+    <h1 class="mt-5 titulo">Cadastro de Promoções</h1>
       
     <table class="table table-bordered padding">
       <thead>
-        <tr>
-          <th scope="col">#</th>
+        <tr>          
           <th scope="col">Nome</th>
           <th scope="col">Titulo</th>
           <th scope="col">Produto</th>
@@ -58,25 +57,28 @@
         <% lista.forEach(lista => {  %>
     
           <tr value="<%= lista.id %>">
-          <th scope="row"><%= lista.id %></th>
+         
           <td><%= lista.nome %></td>
           <td><%= lista.titulo %></td>
           <td><%= lista.produto %> </td>
           <td><%= lista.subproduto  %></td>
           <td><%= lista.valor  %></td>
-          <td><button class="btn btn-secondary">Editar</button>
-            <button class="btn btn-danger">Apagar</button> </td>
+          <td><button class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal2" data-id="<%= lista.id %>"
+            data-nome="<%= lista.nome %>" data-titulo="<%= lista.titulo %>" data-produto="<%= lista.produto %>"
+            data-subproduto="<%= lista.subproduto %>" data-valor="<%= lista.valor%>" >Editar</button>
+            <button class="btn btn-danger" data-toggle="modal" data-target="#staticDeletar" data-id="<%= lista.id %>"  data-nome="<%= lista.nome %>"   >Apagar</button> </td>
         </tr>
         <% }); %>
        
       </tbody>
     </table>
 
+    <% if(lista.length >= 3){ %>
+      <p>Limete de promoções atingido para cadastrar mais realizar a exlusão de algum</p>
+
+      <%} else{  %> 
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Novo</button>
-
-
-
-
+    <% }  %>
 
     
   </div>
@@ -87,9 +89,6 @@
     <span class="text-muted">Desenvolvido por Cena Tecnologia </span>
   </div>
 </footer>
-
-
-
   </body>
 
   <!-- Modal cadastro-->
@@ -106,19 +105,19 @@
         <form method="post" onsubmit="validarCampos(this); return false;" >
           <div class="form-group">
             <label for="recipient-name" class="col-form-label">Nome:</label>
-            <input type="text" class="form-control" name="nome" id="nome">
+            <input type="text" class="form-control"  maxlength="20"name="nome" id="nome">
 
             <label for="recipient-titulo" class="col-form-label">Titulo:</label>
-            <input type="text" class="form-control" name="titulo" id="titulo">
+            <input type="text" class="form-control"  maxlength="10" name="titulo" id="titulo">
 
             <label for="recipient-produto" class="col-form-label">Produto:</label>
-            <input type="text" class="form-control" name="produto" id="produto">
+            <input type="text" class="form-control"  maxlength="10" name="produto" id="produto">
 
             <label for="recipient-subProduto" class="col-form-label">SubProduto:</label>
-            <input type="text" class="form-control" name="subproduto" id="subproduto">
+            <input type="text" class="form-control"  maxlength="20" name="subproduto" id="subproduto">
 
             <label for="recipient-valor" class="col-form-label">Valor:</label>
-            <input type="text" class="form-control" name="valor" id="valor">
+            <input type="text" class="form-control"  maxlength="10"name="valor" id="valor">
           </div>
                 
 
@@ -133,6 +132,77 @@
     </div>
   </div>
 </div>
+
+
+ <!-- Modal editar-->
+ <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Nova promoção</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form method="post" onsubmit="EditaCampos(this); return false;" >
+          <div class="form-group">
+            <label for="recipient-name" class="col-form-label">Nome:</label>
+            <input type="text" class="form-control"  maxlength="20" name="nome" id="nome">
+
+            <label for="recipient-titulo" class="col-form-label">Titulo:</label>
+            <input type="text" class="form-control"  maxlength="10"name="titulo" id="titulo">
+
+            <label for="recipient-produto" class="col-form-label">Produto:</label>
+            <input type="text" class="form-control"  maxlength="10" name="produto" id="produto">
+
+            <label for="recipient-subProduto" class="col-form-label">SubProduto:</label>
+            <input type="text" class="form-control"  maxlength="13" name="subproduto" id="subproduto">
+
+            <label for="recipient-valor" class="col-form-label">Valor:</label>
+            <input type="text" class="form-control"  maxlength="10" name="valor" id="valor">
+          </div>                
+
+         </div>
+         <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+          <button id="btnEditando"  type="submit" class="btn btn-primary">Gravar</button>
+        </div>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal confirmar delete-->
+<div class="modal fade" id="staticDeletar" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Deletar</h5>
+       
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body"> 
+        
+        <form method="post" onsubmit="DeletaPromocao(this); return false;" >
+
+          <button type="button" class="btn btn-secondary" data-dismiss="modal"> Fechar</button>
+          <button type="submit" id="novo" class="btn btn-danger">Deletar</button>   
+
+          </form>
+
+
+
+    </div>
+  </div>
+</div>
+</div>
+
 
 <script src="/javascripts/jquery.min.js"></script>
 <script  src="/javascripts/bootstrap.min.js"></script>
@@ -195,14 +265,130 @@
       alert("Ocorreu um erro tente novamente")
     }
 
-    return false
-
-
-   
+    return false   
     
   }
 </script>
 
+
+<script>
+  $('#exampleModal2').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var id = button.data('id')
+  var nome = button.data('nome')
+  var titulo = button.data('titulo')
+  var produto = button.data('produto')
+  var subproduto = button.data('subproduto')
+  var valor = button.data('valor')
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this)
+      modal.find('.modal-title').text('Editando: ID: '+ id + ' Nome : ' +nome).val(id)
+      modal.find('#nome').val(nome)
+      modal.find('#titulo').val(titulo)
+      modal.find('#produto').val(produto)
+      modal.find('#subproduto').val(subproduto)
+      modal.find('#valor').val(valor)          
+    
+    })
+</script>
+<script>
+async function EditaCampos(){
+  let modal = $('#exampleModal2')
+  let id = modal.find('.modal-title').val()
+  let nome = modal.find('#nome').val()
+  let titulo = modal.find('#titulo').val()
+  let produto = modal.find('#produto').val()
+  let subproduto = modal.find('#subproduto').val()
+  let valor = modal.find('#valor').val()
+  console.log(id)
+
+
+  if(nome ==''){
+    alert("Preencha o Nome")
+    return false
+  }
+  if(titulo ==''){
+    alert("Preencha o Titulo")
+    return false
+  }
+  if(produto ==''){
+    alert("Preencha o Produto")
+    return false
+  }
+
+  let resposta = await fetch(window.location.href + '/editapromocao/' + id +'?_method=PUT', {
+    method: 'PUT',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+     nome,
+     titulo,
+     produto,
+     subproduto,
+     valor
+    })
+  })
+
+  let resultado = await resposta.json()
+
+  if(resposta.status == 200){
+    alert("Dados salvo com sucesso!")
+    window.location.reload();
+
+  }else{
+    alert("Ocorreu um erro tente novamente")
+  }
+
+  return false
+ 
+  
+}
+</script>
+
+<script>
+  $('#staticDeletar').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var nome = button.data('nome')
+  var id = button.data('id')
+   // Extract info from data-* attributes
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this)
+  modal.find('.modal-title').text('Deseja deletar a promoção: ' + nome).val(id)
+     
+})
+</script>
+<script>
+  async function DeletaPromocao(){
+    let modal = $('#staticDeletar')
+    let id = modal.find('.modal-title').val()   
+  
+    let resposta = await fetch(window.location.href + '/deletapromocao/' + id +'?_method=DELETE', {
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+    })
+  
+    let resultado = await resposta.json()
+  
+    if(resposta.status == 200){
+      alert("Promoção apagada com sucesso!")
+      window.location.reload();
+  
+    }else{
+      alert("Ocorreu um erro tente novamente")
+    }
+  
+    return false
+   
+    
+  }
+  </script>
 
 
 </html>
