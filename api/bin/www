@@ -30,7 +30,6 @@ server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
 
-
 //instanciando io socket e começo da logica conexão porta com. 
 
 const io = require('socket.io')(server)
@@ -108,6 +107,7 @@ if(com1.ENTRADA != ''){
       timestamp = new Date().getTime(); 
         if(data === '0;14;1;' && timestamp >= timeout  ){           
              timeout = timestamp + 20000
+            
           let data = new Date().getTime();
          console.log(data)        
          

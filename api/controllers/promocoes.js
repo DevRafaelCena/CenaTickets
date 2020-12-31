@@ -7,13 +7,19 @@ let promocoes = {
         sqlite.connect('./database/database.sqlite'); 
         
        let lista =''
+       let video =''
         const dados = sqlite.run("SELECT * FROM promocoes", function(rows){
             console.log(rows)
             lista = rows
         })
+        const dados2 = sqlite.run("SELECT * FROM arquivos", function(rows2){
+            console.log(rows2)
+            video = rows2
+        })       
         sqlite.close();
         res.status(200).render("adm", {
             lista,
+            video,
             title: 'Administração' 
           }) 
     
@@ -79,6 +85,40 @@ let promocoes = {
     
       },
 
+      storeVideo: async (req, res) => {
+        sqlite.connect('./database/database.sqlite');         
+        const{titulo,tempo} = req.body
+        const [arquivo] = req.files;
+        arquivo2 = `/arquivos/${arquivo.filename}`
+
+        sqlite.insert("arquivos",{titulo:titulo, tempo: tempo, status:'ATIVA', path:arquivo2}, function(res){
+            if(res.error)
+                throw res.error;
+            else{   
+            console.log('Salvo com sucesso');
+        } 
+        });
+        sqlite.close();
+        return res.status(200).redirect("/adm")    
+    
+      },
+      DeleteVideo: async (req, res) => {
+        sqlite.connect('./database/database.sqlite');     
+        const {id} = req.params         
+      
+      
+
+        sqlite.delete("arquivos",{id:id}, function(res){
+            if(res.error)
+                throw res.error;
+            else{   
+            console.log('Video deletado com sucesso');
+        } 
+        });
+        sqlite.close();
+        return res.status(200).json({msg: "Teste"})  
+    
+      },   
 
 
 }

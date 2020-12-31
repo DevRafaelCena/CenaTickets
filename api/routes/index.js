@@ -4,6 +4,11 @@ var router = express.Router();
 const Ticket = require("../controllers/imprimirCOM")
 const Promocoes = require("../controllers/promocoes")
 
+const upload = require("../config/upload");
+
+router.post('/adm/video' ,upload.any(), Promocoes.storeVideo)
+router.delete('/adm/video/:id' , Promocoes.DeleteVideo)
+
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });

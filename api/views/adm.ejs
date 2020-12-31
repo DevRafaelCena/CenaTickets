@@ -80,6 +80,37 @@
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Novo</button>
     <% }  %>
 
+<!-- começo do menu para video -->
+    <h1 class="mt-5 titulo">Cadastro de Promoção em Video</h1>
+      
+    <table class="table table-bordered padding">
+      <thead>
+        <tr>          
+          <th scope="col">Titulo</th>          
+          <th scope="col">Tempo de video( em segundos)</th>          
+        </tr>
+      </thead>
+      <tbody>
+        <% video.forEach(video => {  %>
+    
+          <tr value="<%= video.id %>">
+         
+          <td><%= video.titulo %></td>         
+          <td><%= video.tempo %> </td>       
+          <td><button class="btn btn-danger" data-toggle="modal" data-target="#staticDeletarVideo" data-id="<%= video.id %>"  data-titulo="<%= video.titulo %>"   >Apagar</button> </td>
+        </tr>
+        <% }); %>
+       
+      </tbody>
+    </table>
+
+    <% if(video.length >= 1){ %>
+      <p>Limete de quantidade de video atingido</p>
+
+      <%} else{  %> 
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#novoVideo" data-whatever="@mdo">Novo Video</button>
+    <% }  %>
+
     
   </div>
 </main>
@@ -203,6 +234,69 @@
 </div>
 </div>
 
+ <!-- Modal video novo-->
+ <div class="modal fade" id="novoVideo" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Novo video</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="novo" method="POST" action="/adm/video" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="recipient-titulo" class="col-form-label">Titulo:</label>
+            <input type="text" class="form-control"  maxlength="20"name="titulo" id="titulo">
+
+            <label for="recipient-tempo" class="col-form-label">Tempo de execução do video (em segundos):</label>
+            <input  class="form-control" type="number" maxlength="10" name="tempo" id="tempo">
+
+            <label style="margin-top:20px"for="arquivo">Arquivo</label>
+            <input type="file" class="form" name="arquivo" id="arquivo" accept="audio/*,video/*,image/*">
+          </div>
+                
+
+         </div>
+         <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+          <button id="btnSalvarVideo" type="submit" class="btn btn-primary">Gravar</button>
+        </div>
+        </form>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirmar delete video-->
+<div class="modal fade" id="staticDeletarVideo" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Deletar</h5>
+       
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body"> 
+        
+        <form method="post" onsubmit="DeletaPromocaoVideo(this); return false;" >
+
+          <button type="button" class="btn btn-secondary" data-dismiss="modal"> Fechar</button>
+          <button type="submit" id="novo" class="btn btn-danger">Deletar</button>   
+
+          </form>
+
+
+
+    </div>
+  </div>
+</div>
+</div>
+
 
 <script src="/javascripts/jquery.min.js"></script>
 <script  src="/javascripts/bootstrap.min.js"></script>
@@ -303,7 +397,6 @@ async function EditaCampos(){
   let valor = modal.find('#valor').val()
   console.log(id)
 
-
   if(nome ==''){
     alert("Preencha o Nome")
     return false
@@ -361,6 +454,20 @@ async function EditaCampos(){
      
 })
 </script>
+
+<script>
+  $('#staticDeletarVideo').on('show.bs.modal', function (event) {
+  var button = $(event.relatedTarget) // Button that triggered the modal
+  var titulo = button.data('titulo')
+  var id = button.data('id')
+   // Extract info from data-* attributes
+  // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+  // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+  var modal = $(this)
+  modal.find('.modal-title').text('Deseja deletar o video: ' + titulo).val(id)
+     
+})
+</script>
 <script>
   async function DeletaPromocao(){
     let modal = $('#staticDeletar')
@@ -386,6 +493,76 @@ async function EditaCampos(){
   
     return false
    
+    
+  }
+  </script>
+  <script>
+    async function DeletaPromocaoVideo(){
+      let modal = $('#staticDeletarVideo')
+      let id = modal.find('.modal-title').val()   
+    
+      let resposta = await fetch(window.location.href + '/video/' + id +'?_method=DELETE', {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+      })
+    
+      let resultado = await resposta.json()
+    
+      if(resposta.status == 200){
+        alert("Video apagado com sucesso!")
+        window.location.reload();
+    
+      }else{
+        alert("Ocorreu um erro tente novamente")
+      }
+    
+      return false
+     
+      
+    }
+    </script>
+
+  <script>
+     async function validarVideo(){
+    let modal = $('#novoVideo')   
+    let titulo = modal.find('#titulo').val()
+    let tempo = modal.find('#tempo').val()   
+   
+    if(titulo ==''){
+      alert("Preencha o Titulo")
+      return false
+    }
+    if(tempo ==''){
+      alert("Preencha o tempo")
+      return false
+    }
+
+    let resposta = await fetch(window.location.href + 'video', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'multipart/form-data'
+      },
+      body: JSON.stringify({       
+       titulo,
+       tempo,       
+      })
+    })
+
+    let resultado = await resposta.json()
+
+    if(resposta.status == 200){
+      alert("Dados salvo com sucesso!")
+      window.location.reload();
+
+    }else{
+      alert("Ocorreu um erro tente novamente")
+    }
+
+    return false   
     
   }
   </script>
