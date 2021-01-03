@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<DATAPACKET>
+  <METADATA>
+    <FIELDS>
+      <FIELD WIDTH="20" fieldtype="string" attrname="ID_COMANDA"/>
+      <FIELD WIDTH="1" fieldtype="string" attrname="EVENTO"/>
+    </FIELDS>
+    <PARAMS CHANGE_LOG="1 0 4"/>
+  </METADATA>
+  <ROWDATA>
+    <ROW EVENTO="V" ID_COMANDA="1115111027" RowState="4"/>
+  </ROWDATA>
+</DATAPACKET>

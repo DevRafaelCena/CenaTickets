@@ -14,10 +14,10 @@
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item active">
-            <a class="nav-link" aria-current="page" href="#">Promoções</a>
+            <a class="nav-link" aria-current="page" href="/adm">Promoções</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Configurações</a>
+            <a class="nav-link" href="/adm/config">Configurações</a>
           </li>
           
         </ul>
@@ -37,15 +37,65 @@
       <a class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Configuração de Audios</a>
     </li>
     <li class="nav-item" role="presentation">
-      <a class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Lotação e avisos</a>
+      <a class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Tempos</a>
     </li>
     <li class="nav-item" role="presentation">
       <a class="nav-link" id="pills-contact-tab" data-bs-toggle="pill" href="#pills-contact" role="tab" aria-controls="pills-contact" aria-selected="false">Relatorios</a>
     </li>
   </ul>
   <div class="tab-content" id="pills-tabContent">
-    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">aaaa</div>
-    <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">bbbb</div>
+    <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+
+      <div class="mb-3 row">
+        <label for="inputEntrada" class="col-sm-2 col-form-label">Áudio entrada</label>
+        
+        <div class="col-sm-6">
+          <input type="text" value="<%= lista[0].fraseEntrada %>"class="form-control" id="inputEntrada">
+        </div>
+        <button onclick="OuvirEntrada()" style="margin-left: 10px; margin-right: 10px" class="btn btn-primary" >Ouvir</button>
+        <button onclick="audioEntrada()" class="btn btn-danger" >Gravar</button>
+        
+      </div>
+
+      <div style="margin-top: 10px;" class="mb-3 row">
+        <label for="inputEntrada" class="col-sm-2 col-form-label">Áudio saida</label>
+        
+        <div class="col-sm-6">
+          <input type="text" value="<%= lista[0].fraseSaida %>" class="form-control" id="inputSaida">
+        </div>
+        <button onclick="OuvirSaida()" style="margin-left: 10px; margin-right: 10px" class="btn btn-primary" >Ouvir</button>
+        <button onclick="audioSaida()" class="btn btn-danger" >Gravar</button>
+        
+      </div>
+
+      <p>***** ATENÇÂO : o áudio é reproduzido localmente pelo navegador utilizado, podendo ocorrer variações, entre versões e sistemas operacionais</p>
+
+
+    </div>
+    <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+<!-- //tempos -->
+      <div class="mb-3 row">
+        <label for="inputTempoVideo" class="col-sm-4 col-form-label">Repetição de video( informar em minutos)</label>
+        
+        <div class="col-sm-2">
+          <input type="number" value="<%= lista[0].tempoRepeticaoVideo %>"class="form-control" id="inputTempoVideo">
+        </div>
+         <button onclick="TempoVideo()" class="btn btn-danger" >Gravar</button>
+        
+      </div>
+
+     <!--  <div class="mb-3 row">
+        <label for="inputTempoPromocoes" class="col-sm-4 col-form-label">Tempo entre promoções ( informar em minutos)</label>
+        
+        <div class="col-sm-2">
+          <input type="number" value="<%= lista[0].tempoEntrePromocoes %>"class="form-control" id="inputTempoPromocoes">
+        </div>
+         <button onclick="TempoPromocoes()" class="btn btn-danger" >Gravar</button>
+        
+      </div> -->
+
+
+    </div>
     <div class="tab-pane fade" id="pills-contact" role="tabpanel" aria-labelledby="pills-contact-tab">cccc</div>
   </div>
 
@@ -67,4 +117,168 @@ triggerTabList.forEach(function (triggerEl) {
   })
 })
 </script>
+<script>
+async function audioEntrada(){
+  let inputEntrada = document.getElementById('inputEntrada').value;
+
+  if(inputEntrada ==''){
+    alert("Não pode ficar em branco")
+    return false
+  }
+
+  let resposta = await fetch(window.location.href + '/entrada' +'?_method=PUT', {
+    method: 'PUT',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      inputEntrada 
+    })
+  })
+
+  let resultado = await resposta.json()
+  console.log(resposta)
+
+  if(resposta.status == 200){
+    alert("Dados salvo com sucesso!")
+    window.location.reload();
+
+  }else{
+    alert("Ocorreu um erro tente novamente")
+  }
+
+  return 
+  
+}
+</script>
+
+<script>
+async function OuvirEntrada(){
+  let inputEntrada = document.getElementById('inputEntrada').value;
+  const utterance = new SpeechSynthesisUtterance()
+    utterance.text = inputEntrada
+    utterance.lang ="pt-BR"
+    utterance.rate = 2;
+    speechSynthesis.speak(utterance)  
+}
+</script>
+
+<script>
+  async function audioSaida(){
+    let inputSaida = document.getElementById('inputSaida').value;
+  
+    if(inputSaida ==''){
+      alert("Não pode ficar em branco")
+      return false
+    }
+  
+    let resposta = await fetch(window.location.href + '/saida' +'?_method=PUT', {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        inputSaida
+      })
+    })
+  
+    let resultado = await resposta.json()
+   
+    if(resposta.status == 200){
+      alert("Dados salvo com sucesso!")
+      window.location.reload();
+  
+    }else{
+      alert("Ocorreu um erro tente novamente")
+    }
+  
+    return 
+    
+  }
+  </script> 
+  
+
+  <script>
+  async function OuvirSaida(){
+    let inputSaida = document.getElementById('inputSaida').value;
+    const utterance = new SpeechSynthesisUtterance()
+      utterance.text = inputSaida
+      utterance.lang ="pt-BR"
+      utterance.rate = 2;
+      speechSynthesis.speak(utterance)  
+  }
+  </script>
+<script>
+async function TempoVideo(){
+  let inputTempoVideo = document.getElementById('inputTempoVideo').value;
+
+  if(inputTempoVideo ==''){
+    alert("Não pode ficar em branco")
+    return false
+  }
+
+  let resposta = await fetch(window.location.href + '/tempoVideo' +'?_method=PUT', {
+    method: 'PUT',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      inputTempoVideo
+    })
+  })
+
+  let resultado = await resposta.json()
+  console.log(resposta)
+
+  if(resposta.status == 200){
+    alert("Dados salvo com sucesso!")
+    window.location.reload();
+
+  }else{
+    alert("Ocorreu um erro tente novamente")
+  }
+
+  return 
+  
+}
+</script>
+<!-- 
+<script>
+  async function TempoPromocoes(){
+    let inputTempoPromocoes = document.getElementById('inputTempoPromocoes').value;
+  
+    if(inputTempoPromocoes ==''){
+      alert("Não pode ficar em branco")
+      return false
+    }
+  
+    let resposta = await fetch(window.location.href + '/tempoPromocoes' +'?_method=PUT', {
+      method: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        inputTempoPromocoes
+      })
+    })
+  
+    let resultado = await resposta.json()
+    console.log(resposta)
+  
+    if(resposta.status == 200){
+      alert("Dados salvo com sucesso!")
+      window.location.reload();
+  
+    }else{
+      alert("Ocorreu um erro tente novamente")
+    }
+  
+    return 
+    
+  }
+  </script> -->
 </html>

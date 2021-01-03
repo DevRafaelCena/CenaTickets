@@ -118,6 +118,16 @@ let promocoes = {
         sqlite.close();
         return res.status(200).json({msg: "Teste"})  
     
+      },
+      GetVideo: async (req, res) => {
+        sqlite.connect('./database/database.sqlite');         
+        const dados2 = sqlite.run("SELECT * FROM arquivos", function(rows2){
+            console.log(rows2)
+            video = rows2
+        })       
+        sqlite.close();
+        res.status(200).json(video) 
+    
       },   
 
 

@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
+
+
 /**
  * Module dependencies.
  */
- 
+const axios = require('axios');
+const { json } = require('express');
 const socketIo = require("socket.io")
 var app = require('../app');
 var debug = require('debug')('api:server');
@@ -70,18 +73,78 @@ var jsonData = JSON.parse(config);
 
 com1 = jsonData
 
+function getTicketSQG() {
 
 
-console.log(com1.ENTRADA)
+if(com1.TIPO == 2) {  
+  var Dadojson = [{     
+    "mensagem": "100000-Ticket criado com sucesso.",
+    "ticket": 32,
+    "data": "2020-11-24 10:24:26"
+    }]  
+    return  axios.get(com1.API + '/cancela-estacionamento/ticket_Geracao.php').then(function (response) {
+      return Dadojson
+    })
+    .catch(function (error) {
+      console.log("Tratar erro de conexão")
+      return Dadojson
+    })
+  }else{
+    var Dadojson = {
+      "dados":{"codigo":6200004,"codigoBarra":"6200004"},
+      "status":{"codigo":200,"mensagem":null,"quantidade":1,"tipo":"OK"}
+      }      
+    return  axios.get(com1.API + "consumos/proximo/?modo_venda=4&abre=true", {auth: { username: com1.USUARIO, password: com1.SENHA}}).then(function (response) {
+      return Dadojson
+    })
+    .catch(function (error) {
+      console.log("Tratar erro de conexão")
+      return Dadojson
+    })
+  } 
+}
+function setTicketSQG(numero) {
+//  função saida 
+if(com1.TIPO == 2) { 
+  var Dadojson = [
+    {
+    "mensagem": "100000-OK",
+    "status": "VL"
+    }
+   ]
+    return  axios.get(com1.API + '/cancela-estacionamento/ticket_Consulta.php?ticket='+ numero,  {timeout: 1000},).then(function (response) {
+      return Dadojson
+    })
+    .catch(function (error) {
+      console.log("Tratar erro de conexão")
+      return "Dadojson"
+    })
+  }else{
+    var Dadojson = {
+      "dados":{"codigo":6200004,"codigoBarra":"6200004"},
+      "status":{"codigo":200,"mensagem":null,"quantidade":1,"tipo":"OK"}
+      }
+    return  axios.get(com1.API + "/consumos/checkout/?modo_venda=4&codigo=" + numero, {auth: { username: com1.USUARIO, password: com1.SENHA}}).then(function (response) {
+      return Dadojson
+    })
+    .catch(function (error) {
+      console.log("Tratar erro de conexão")
+      return "Dadojson"
+    })
+  } 
+}
+function getUserAccount() {
+  return 'teste2';
+}
 
-Imprimir.SaidaDatamaxi()
-
+//Imprimir.SaidaDatamaxi()
+const liberaHorario = '0;1;1;\r'
+const liberaAntHorario = '0;2;1;\r' 
 
 //Conectando na ENTRADA 
 if(com1.ENTRADA != ''){
 
- function Conecta(){
-  const libera = '0;2;1;\r' 
+ function Conecta(){  
   var port = new SerialPort(com1.ENTRADA, {
     baudRate: 115200,
     dataBits: 8,
@@ -96,39 +159,96 @@ if(com1.ENTRADA != ''){
       if (err) {
         console.log("deu erro ao conectar COM ENTRADA: " + err)
         statusCom1 = 1
-      }else{     
-      port.write(libera)
+      }else{          
       console.log('conectado COM ENTRADA')
           
     }});
     var timestamp = 1
     var timeout = 0    
-    parser.on('data', function (data){        
+    let ultimoTicket = ''
+    let status =0
+    parser.on('data', async function (data){  
+      console.log("recebeu da com ENTRADA : " + data)   
+      console.log(com1.TEMPONOVAIMPRESSAO)   
       timestamp = new Date().getTime(); 
-        if(data === '0;14;1;' && timestamp >= timeout  ){           
-             timeout = timestamp + 20000
+
+        if(data === '0;14;1;' && timestamp >= timeout  ){  
+                   
+            
             
           let data = new Date().getTime();
-         console.log(data)        
-         
-          if(com1.INTEGRADOR == 1){
-        Imprimir.GerarSQG()
-       
-      }else{
-        Imprimir.GerarDatamaxi()
-       
-      } 
-      setTimeout(function(){
-        port.write(libera)
-      },3000) 
-       io.emit('serial:data',{
-          value: "IMPRESSAO"  })
-        
-          
-        }
-
-  
+          if(com1.TIPO ==1 && status > 0)
+          {
+            console.log("Aguarde o giro")
+          }else{
      
+            timeout = timestamp + com1.TEMPONOVAIMPRESSAO
+          if(com1.INTEGRADOR == 1){
+
+                  console.log("Integrador SQG")              
+                  Promise.all([getTicketSQG()])
+                  .then(function (results) {
+                    const perm  = results[0];   
+                    console.log(perm) 
+                    if(com1.TIPO ==1){      
+                      var novoTicket = perm.dados.codigoBarra                      
+                    }else{ 
+                      var novoTicket = perm[0].ticket
+                    } 
+                    console.log(novoTicket)                         
+
+                  if(novoTicket>0 ){
+                    ultimoTicket = novoTicket
+                    console.log("função imprimir")
+                    setTimeout(function(){
+                      status = 1
+                      if(com1.SENTIDOENTRADA == 1){
+                        port.write(liberaHorario)
+                      }else if(com1.SENTIDOENTRADA == 2){
+                        port.write(liberaAntHorario)
+                      }                      
+                    },3000) 
+                    io.emit('serial:data',{
+                        value: "IMPRESSAO"  })            
+                   }                  
+                });     
+               
+                  
+          }else if(com1.INTEGRADOR == 2){   //integração com datamaxi
+            //função ler sequencial e pegar um numero (a implementar) 
+            let novoTicket = new Date().getMinutes();
+            Imprimir.GerarDatamaxi(novoTicket)
+            if(novoTicket>0 ){
+              ultimoTicket = novoTicket              
+              console.log("função imprimir")
+              setTimeout(function(){
+                status = 1
+                if(com1.SENTIDOENTRADA == 1){
+                  port.write(liberaHorario)
+                }else if(com1.SENTIDOENTRADA == 2){
+                  port.write(liberaAntHorario)
+                }                      
+              },3000) 
+              io.emit('serial:data',{
+                  value: "IMPRESSAO"  })            
+             }       
+
+          }        
+              
+        }  
+     console.log("Ultimo ticket emitido foi : " +ultimoTicket)
+    }
+    
+
+    if(data === '0;12;' && com1.TIPO == 1 ){
+      status = 0
+      console.log("acesso nao utilizado")
+      if(ultimoTicket > 0){
+        ultimoTicket = 0;
+        status = 0
+        console.log("No sqg Realizar a saida via api")
+      }
+    }
     })  
     
   port.on('close', function(){
@@ -151,8 +271,7 @@ if(com1.ENTRADA != ''){
 if(com1.SAIDA != '') {
   erro = 1
   function ConectaSAIDA(){
-    const libera = '0;1;1;\r' 
-  
+     
     var port2 = new SerialPort(com1.SAIDA, {
       baudRate: 9600,
       dataBits: 8,
@@ -168,7 +287,7 @@ if(com1.SAIDA != '') {
           console.log("Erro ao Conectar COM SAIDA : " + err)
           
         }else{     
-        port2.write(libera)
+
         console.log('conectado COM SAIDA')
             
       }});

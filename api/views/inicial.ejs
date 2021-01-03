@@ -3,7 +3,26 @@
 <html>
   <head>
     <title><%= title %></title>
-   
+   <script>
+     
+var configuracao = ''
+async function configuracoes(){
+  let resposta = await fetch('./adm/configs', {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },      
+    })
+
+    let resultado = await resposta.json()
+ 
+  
+      configuracao = resultado[0]
+      console.log("O tempo video é : " + configuracao.tempoRepeticaoVideo)
+}
+configuracoes();
+   </script>
     
     <link rel="stylesheet" href="/stylesheets/bootstrap.min.css"/>
     <style>
@@ -95,6 +114,25 @@
 .linha2{
   font-family:Verdana, Geneva, Tahoma, sans-serif ;
 }
+#video{
+  width: 100%;
+        height: 100%;
+        margin: none;
+        padding: none !important;
+        color:white;
+        size: 200px;
+        font-size: xx-large;
+        text-align: center;
+        justify-content: center;
+
+}
+.input-hidden{
+  border: none;
+  color:white;
+  box-shadow: 0 0 0 0;
+    border: 0 none;
+    outline: 0;
+}
 
 
     </style>
@@ -108,7 +146,7 @@
        <img id="logo" src="/images/logomenor1.jpeg" alt="">
       </div>
       <div class="col-sm">
-       <h1>Bem - vindo 
+       <h1 id="nomePadaria">Bem - vindo 
          a Padaria Cena Pães
        </h1>
       </div>
@@ -153,13 +191,14 @@
     <div class="col-8 frase nopadding">
       <p class='linha1 nopadding'>APROXIME A MÂO DO SENSOR</p>
       <p class='linha2 nopadding'>PARA IMPRIMIR A COMANDA</p>
+    
     </div>
+   
     <div class="col-2 nopadding">
-      
+      <input autofocus id="ticket" class="input-hidden" name="Com Foco" >
     </div>
    
   </div>
-
 </div>
 
 </div>
@@ -168,6 +207,7 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
+   document.getElementById('ticket').focus();
    const utterance = new SpeechSynthesisUtterance()
   const socket = io();
   /* const allVoicesObtained = new Promise(function(resolve, reject) {
@@ -194,13 +234,14 @@
 
 let counter =2; //contator tempo
 var valorSerial =''
+
+
 socket.on('serial:data',function(dataSerial){
     console.log("recebendo do backend : " + dataSerial.value)
     valorSerial = dataSerial.value
-    if(valorSerial == "IMPRESSAO"){
-  console.log("é igual")
- 
-    utterance.text ="Seja bem vindo a Padaria. Utilize a Máscara"
+    if(valorSerial == "IMPRESSAO"){    
+     
+    utterance.text = configuracao.fraseEntrada
     utterance.lang ="pt-BR"
     utterance.rate = 2;     
     speechSynthesis.speak(utterance)
@@ -246,27 +287,40 @@ async function buscandoPromocoes(){
         document.getElementById("subproduto").innerHTML = resultado[i].subproduto;
         document.getElementById("valor").innerHTML = "R$ " + resultado[i].valor;
 
-    }, 10000 * i);
+    }, 10000 * i); //tempo de uma propaganda a outra
   }
 
       
 }
-setInterval(()=>{
+ setInterval(()=>{
   buscandoPromocoes()
 
-},20000)
+},20000) //tempo executa as propagandas novamente
 
 
 
 
 </script>
 
-<script>
- var $wrapper = document.querySelector('#colCorpo'),
+<script>   
+  async function buscandoVideo(){
+     
+     let resposta = await fetch('./adm/buscavideo', {
+         method: 'GET',
+         headers: {
+           'Accept': 'application/json',
+           'Content-Type': 'application/json'
+         },      
+       })
+   
+       let resultado = await resposta.json()    
+       console.log(resultado)
+
+       var $wrapper = document.querySelector('#colCorpo'),
     // Pega a string do conteúdo atual
     HTMLTemporario = $wrapper.innerHTML,
     // Novo HTML que será inserido
-    HTMLNovo = '<video id="video" src="/arquivos/0aHq24wFwb.mp4" Autoplay ></video>'
+    HTMLNovo = `<video id="video" src=${resultado[0].path} Autoplay ></video>`
 
 // Concatena as strings colocando o novoHTML antes do HTMLTemporario
 HTMLTemporario2 = HTMLNovo
@@ -277,9 +331,90 @@ $wrapper.innerHTML = HTMLTemporario2;
 
 setTimeout(()=>{
   $wrapper.innerHTML = HTMLTemporario;
-},30000)
-
+},resultado[0].tempo*1000)   //tempo executanto o video  
+         
+   }
+    //tempo que vai mostrar o video
+  
+   setTimeout(() => {
+    setInterval(()=>{
+    console.log("tempo: " + configuracao.tempoRepeticaoVideo)
+    buscandoVideo()
+ 
+   },configuracao.tempoRepeticaoVideo *60000)},2000)
+               
 
 </script>
+
+<script>
+
+  const inputTicket = document.getElementById('ticket');
+  inputTicket.addEventListener('keyup', function(e){
+    var valor = this.value
+    var key = e.which || e.keyCode;
+    if (key == 13) { // codigo da tecla enter
+      // colocas aqui a tua função a rodar
+      alert('carregou enter o valor digitado foi: ' +this.value);
+      var myHeaders = new Headers();
+          var myInit = { method: 'GET',
+                        headers: myHeaders,
+                        mode: 'cors',
+                        cache: 'default' };
+  
+      
+    
+  /* 
+      var myHeaders = new Headers();
+          var myInit = { method: 'GET',
+                        headers: myHeaders,
+                        mode: 'cors',
+                        cache: 'default' };
+  
+          fetch('http://localhost:3000/exit/' + this.value,myInit)
+          .then(function(response) {
+            console.log("teste1")
+            return   document.getElementById('ticket').value='foi';;
+          })
+          .then(function() {
+            document.getElementById('ticket').value='foi2';
+            console.log("teste2")
+          }); */     
+  
+    fetch('http://localhost:3000/exit/' + this.value,myInit)
+    .then(function (response) {
+      console.log("ok")
+     ticket = valor;
+     console.log(typeof(ticket));
+  
+      if(ticket == '10'){
+  
+      const utterance = new SpeechSynthesisUtterance()
+      utterance.text = configuracao.fraseSaida
+      utterance.lang ="pt-BR"
+      utterance.rate = 2;
+      speechSynthesis.speak(utterance)
+    }else{
+      const utterance = new SpeechSynthesisUtterance()
+      utterance.text ="Ticket não localizado, retorne ao caixa!"
+      utterance.lang ="pt-BR"
+      utterance.rate = 2;
+      speechSynthesis.speak(utterance)
+    }
+  
+    }).catch(function (error) {
+          console.log("Tratar erro de conexão")
+          console.log(error);
+        })
+        .then(function (response) {
+          // always executed
+          console.log("sempre executa")
+          document.getElementById('ticket').value=''
+        });
+    }
+  });
+  
+  
+  
+  </script>
   
 </html>

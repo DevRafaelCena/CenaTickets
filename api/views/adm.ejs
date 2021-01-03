@@ -14,10 +14,10 @@
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           <li class="nav-item active">
-            <a class="nav-link" aria-current="page" href="#">Promoções</a>
+            <a class="nav-link" aria-current="page" href="/adm">Promoções</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Configurações</a>
+            <a class="nav-link" href="/adm/config">Configurações</a>
           </li>
           
         </ul>
@@ -87,7 +87,9 @@
       <thead>
         <tr>          
           <th scope="col">Titulo</th>          
-          <th scope="col">Tempo de video( em segundos)</th>          
+          <th scope="col">Tempo de video( em segundos)</th>
+          <th scope="col">Ações</th>
+                 
         </tr>
       </thead>
       <tbody>
@@ -96,7 +98,9 @@
           <tr value="<%= video.id %>">
          
           <td><%= video.titulo %></td>         
-          <td><%= video.tempo %> </td>       
+          <td><%= video.tempo %> </td>  
+          
+             
           <td><button class="btn btn-danger" data-toggle="modal" data-target="#staticDeletarVideo" data-id="<%= video.id %>"  data-titulo="<%= video.titulo %>"   >Apagar</button> </td>
         </tr>
         <% }); %>
@@ -248,13 +252,14 @@
         <form id="novo" method="POST" action="/adm/video" enctype="multipart/form-data">
           <div class="form-group">
             <label for="recipient-titulo" class="col-form-label">Titulo:</label>
-            <input type="text" class="form-control"  maxlength="20"name="titulo" id="titulo">
+            <input type="text" class="form-control" required   maxlength="20"name="titulo" id="titulo">
 
             <label for="recipient-tempo" class="col-form-label">Tempo de execução do video (em segundos):</label>
-            <input  class="form-control" type="number" maxlength="10" name="tempo" id="tempo">
+            <input  class="form-control" required  type="number" maxlength="10" name="tempo" id="tempo">
 
-            <label style="margin-top:20px"for="arquivo">Arquivo</label>
-            <input type="file" class="form" name="arquivo" id="arquivo" accept="audio/*,video/*,image/*">
+         
+            <label style="margin-top:20px"for="arquivo">Arquivo (extensão suportado: MP4,WebM, Ogg</label>
+            <input type="file" required  class="form" name="arquivo" id="arquivo" accept=".mp4, .ogg, .webm,>
           </div>
                 
 
@@ -529,7 +534,8 @@ async function EditaCampos(){
      async function validarVideo(){
     let modal = $('#novoVideo')   
     let titulo = modal.find('#titulo').val()
-    let tempo = modal.find('#tempo').val()   
+    let tempo = modal.find('#tempo').val()
+    let repeticao= modal.find('#repeticao').val()     
    
     if(titulo ==''){
       alert("Preencha o Titulo")
@@ -539,6 +545,7 @@ async function EditaCampos(){
       alert("Preencha o tempo")
       return false
     }
+   
 
     let resposta = await fetch(window.location.href + 'video', {
       method: 'POST',
@@ -548,7 +555,8 @@ async function EditaCampos(){
       },
       body: JSON.stringify({       
        titulo,
-       tempo,       
+       tempo,
+           
       })
     })
 

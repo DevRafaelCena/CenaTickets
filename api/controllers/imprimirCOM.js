@@ -42,44 +42,7 @@ let imprimir = device.open(function(error){
 
     },
 
-    GerarSQG: async (req,res)=>{     
-      /* Tratamento SQG
-      http://ip_do_servidor /cancela-estacionamento/nome_do_servico
-      Com o sucesso da emissão do ticket, o retorno será como abaixo:
-        [
-        {
-        "mensagem": "100000-Ticket criado com sucesso.",
-        "ticket": 32,
-        "data": "2020-11-24 10:24:26"
-        }
-        ] */
-      axios.get('https://jsonplaceholder.typicode.com/todos/1')
-      .then(function (response) {
-        // handle success
-        console.log(response.data);
-      let Dadojson = [{          
-        "mensagem": "100000-Ticket criado com sucesso.",
-        "ticket": 32,
-        "data": "2020-11-24 10:24:26"
-        }]         
-        
-        console.log(Dadojson);      
-        console.log("função imprime ticket")
-        console.log("Ticket : " + Dadojson[0].ticket)
-        console.log("data: " +  Dadojson[0].data)      
-
-      })
-      .catch(function (error) {
-        console.log("Tratar erro de conexão")
-        console.log(error);
-      })
-      .then(function (response) {
-        // always executed
-        //espaço para log
-      });
-    },
-
-    GerarDatamaxi: async(req,res) =>{
+   GerarDatamaxi: async(numero) =>{
 
               //cria xml
         function novacomanda(numero){
@@ -113,7 +76,7 @@ let imprimir = device.open(function(error){
             });
           
           }
-          novacomanda(110)
+          novacomanda(numero)
       
     },
     SaidaDatamaxi: async(req,res) =>{
@@ -134,7 +97,7 @@ let imprimir = device.open(function(error){
     Saida: async (req,res)=>{  
       const id = req.params.id;
 
-      json = [
+      json2 = [
         {
         "mensagem": "100000-OK",
         "status": "VL"
@@ -143,7 +106,7 @@ let imprimir = device.open(function(error){
       
       console.log("deu Saida : " + id)
 
-      return res.status(200).json(json.status)
+      return res.status(200).json({msg: "ok"})
 
     }
 
