@@ -60,6 +60,8 @@ io.sockets.on('connection', function(socket){
 
 const Imprimir = require('../controllers/imprimirCOM');
 
+
+
 var path = require( 'path' );
 const SerialPort = require('serialport')
 const Readline = require('@serialport/parser-readline')
@@ -73,63 +75,174 @@ var jsonData = JSON.parse(config);
 
 com1 = jsonData
 
+
+
+function ConectaImpressora(novoTicket){
+  console.log("executando impressão : ticket : " + novoTicket)
+  var igm=''
+var teste =''
+  const escpos = require('escpos');
+  escpos.SerialPort = require('escpos-serialport');
+   
+  const serialDeviceOnWindows = new escpos.SerialPort('COM3');
+
+  const options = { encoding: "GB18030" /* default */ }
+  const bwipjs = require('bwip-js');
+// encoding is optional
+bwipjs.toBuffer({
+  bcid:        'code128',       // Barcode type
+  text:       novoTicket,   // Text to encode
+  scale:       3,               // 3x scaling factor
+  height:      10,              // Bar height, in millimeters
+  includetext: false,            // Show human-readable text
+  textxalign:  'center',        // Always good to set this
+}, function (err, png) {
+  if (err) {
+      // `err` may be a string or Error object
+  } else {
+    igm = png
+   console.log(typeof(img))
+   let buff = new Buffer(igm , 'base64');
+ teste =  fs.writeFileSync('./public/arquivos/barras.png', igm );
+
+ const printer = new escpos.Printer(serialDeviceOnWindows, options);
+const tux = path.join('./public/arquivos/barras.png');
+
+escpos.Image.load(tux, function(image){
+serialDeviceOnWindows.open(function(error){
+  printer.align('ct')
+  .size(1,1)
+  .text('Bem-vindo')
+  .text('a Padaria')
+  .text('')
+  .size(2,2)
+  .text(novoTicket)  
+  .image(image)
+  .then(() => { 
+  printer.align('ct')
+  .size(0,0)
+  .text('')
+  .text('após as compras')
+  .text('apresentar este ticket')
+  .text('no caixa')
+     printer.cut().close(); 
+  });
+});
+});
+ 
+      // `png` is a Buffer
+      // png.length           : PNG file length
+      // png.rseadUInt32BE(16) : PNG image width
+      // png.readUInt32BE(20) : PNG image height
+  }
+});
+ 
+
+  }
+
+  function ConectaImpressoraDATAMAXI(novoTicket){
+    console.log("executando impressão : ticket : " + novoTicket)
+    var igm=''
+  var teste =''
+    const escpos = require('escpos');
+    escpos.SerialPort = require('escpos-serialport');
+     
+    const serialDeviceOnWindows = new escpos.SerialPort('COM3');
+  
+    const options = { encoding: "GB18030" /* default */ }
+    const bwipjs = require('bwip-js');
+  // encoding is optional
+  bwipjs.toBuffer({
+    bcid:        'ean13',       // Barcode type
+    text:       '11111110'+novoTicket,   // Text to encode
+    scale:       3,               // 3x scaling factor
+    height:      10,              // Bar height, in millimeters
+    includetext: false,            // Show human-readable text
+    textxalign:  'center',        // Always good to set this
+  }, function (err, png) {
+    if (err) {
+        // `err` may be a string or Error object
+    } else {
+      igm = png
+     console.log(typeof(img))
+     let buff = new Buffer(igm , 'base64');
+   teste =  fs.writeFileSync('./public/arquivos/barras.png', igm );
+  
+   const printer = new escpos.Printer(serialDeviceOnWindows, options);
+  const tux = path.join('./public/arquivos/barras.png');
+  
+  escpos.Image.load(tux, function(image){
+  serialDeviceOnWindows.open(function(error){
+    printer.align('ct')
+    .size(1,1)
+    .text('Bem-vindo')
+    .text('a Padaria')
+    .text('')
+    .size(2,2)
+    .text(novoTicket)  
+    .image(image)
+    .then(() => { 
+    printer.align('ct')
+    .size(0,0)
+    .text('')
+    .text('após as compras')
+    .text('apresentar este ticket')
+    .text('no caixa')
+       printer.cut().close(); 
+    });
+  });
+  });
+   
+        // `png` is a Buffer
+        // png.length           : PNG file length
+        // png.rseadUInt32BE(16) : PNG image width
+        // png.readUInt32BE(20) : PNG image height
+    }
+  });
+   
+  
+    }
+
+
+
+
 function getTicketSQG() {
-
-
 if(com1.TIPO == 2) {  
-  var Dadojson = [{     
-    "mensagem": "100000-Ticket criado com sucesso.",
-    "ticket": 32,
-    "data": "2020-11-24 10:24:26"
-    }]  
     return  axios.get(com1.API + '/cancela-estacionamento/ticket_Geracao.php').then(function (response) {
-      return Dadojson
+      return response.data
     })
     .catch(function (error) {
       console.log("Tratar erro de conexão")
-      return Dadojson
+      return error
     })
-  }else{
-    var Dadojson = {
-      "dados":{"codigo":6200004,"codigoBarra":"6200004"},
-      "status":{"codigo":200,"mensagem":null,"quantidade":1,"tipo":"OK"}
-      }      
-    return  axios.get(com1.API + "consumos/proximo/?modo_venda=4&abre=true", {auth: { username: com1.USUARIO, password: com1.SENHA}}).then(function (response) {
-      return Dadojson
+  }else{    
+    return  axios.get(com1.API + "v1/consumos/proximo/?modo_venda=4&abre=true", {auth: { username: com1.USUARIO, password: com1.SENHA}}).then(function (response) {
+      return response.data
     })
     .catch(function (error) {
       console.log("Tratar erro de conexão")
-      return Dadojson
+      return error
     })
   } 
 }
 function setTicketSQG(numero) {
 //  função saida 
 if(com1.TIPO == 2) { 
-  var Dadojson = [
-    {
-    "mensagem": "100000-OK",
-    "status": "VL"
-    }
-   ]
+
     return  axios.get(com1.API + '/cancela-estacionamento/ticket_Consulta.php?ticket='+ numero,  {timeout: 1000},).then(function (response) {
-      return Dadojson
+      return response.data
     })
     .catch(function (error) {
       console.log("Tratar erro de conexão")
-      return "Dadojson"
+      return error
     })
   }else{
-    var Dadojson = {
-      "dados":{"codigo":6200004,"codigoBarra":"6200004"},
-      "status":{"codigo":200,"mensagem":null,"quantidade":1,"tipo":"OK"}
-      }
-    return  axios.get(com1.API + "/consumos/checkout/?modo_venda=4&codigo=" + numero, {auth: { username: com1.USUARIO, password: com1.SENHA}}).then(function (response) {
-      return Dadojson
+    return  axios.get(com1.API + "v1/consumos/checkout/?modo_venda=4&codigo=" + numero, {auth: { username: com1.USUARIO, password: com1.SENHA}}).then(function (response) {
+      return response.data
     })
     .catch(function (error) {
       console.log("Tratar erro de conexão")
-      return "Dadojson"
+      return error
     })
   } 
 }
@@ -172,10 +285,8 @@ if(com1.ENTRADA != ''){
       console.log(com1.TEMPONOVAIMPRESSAO)   
       timestamp = new Date().getTime(); 
 
-        if(data === '0;14;1;' && timestamp >= timeout  ){  
-                   
-            
-            
+        if(data === '0;14;1;' && timestamp >= timeout  ){                  
+                        
           let data = new Date().getTime();
           if(com1.TIPO ==1 && status > 0)
           {
@@ -192,14 +303,19 @@ if(com1.ENTRADA != ''){
                     console.log(perm) 
                     if(com1.TIPO ==1){      
                       var novoTicket = perm.dados.codigoBarra                      
+                      novoTicket = ("00000000" + novoTicket).slice(-8)  
+                    console.log("novo ticket = " + novoTicket)                 
+                    
                     }else{ 
                       var novoTicket = perm[0].ticket
+                      novoTicket = ("00000000" + novoTicket).slice(-8)
                     } 
                     console.log(novoTicket)                         
 
                   if(novoTicket>0 ){
                     ultimoTicket = novoTicket
                     console.log("função imprimir")
+                    ConectaImpressora(novoTicket)
                     setTimeout(function(){
                       status = 1
                       if(com1.SENTIDOENTRADA == 1){
@@ -216,11 +332,31 @@ if(com1.ENTRADA != ''){
                   
           }else if(com1.INTEGRADOR == 2){   //integração com datamaxi
             //função ler sequencial e pegar um numero (a implementar) 
-            let novoTicket = new Date().getMinutes();
-            Imprimir.GerarDatamaxi(novoTicket)
+           // let novoTicket = new Date().getMinutes();
+            //pega o arquivo sequencial incrementa e edita o arquivo com o novo valor.
+            //const config = fs.readFileSync("./sequencial.json" , "utf8", )   
+            
+          var novoTicket =''
+          var jsonData2 = fs.readFileSync("./sequencial.json", "utf8");
+          var jsonData3 = JSON.parse(jsonData2); 
+          console.log(jsonData3)
+          novoTicket = jsonData3.TICKET
+          novoTicket = novoTicket +1
+          console.log(novoTicket)
+             
+              data = new Date()
+              var novojson = { "TICKET" : novoTicket , "DATAULTIMO": data}
+              novojson = JSON.stringify(novojson)
+              fs.writeFile("./sequencial.json", novojson, (err) => {
+                if (err) throw err;
+                console.log('The file has been saved!');
+              }); 
+           // Imprimir.GerarDatamaxi(novoTicket) */
             if(novoTicket>0 ){
-              ultimoTicket = novoTicket              
+              ultimoTicket = novoTicket        
+
               console.log("função imprimir")
+              ConectaImpressoraDATAMAXI(novoTicket)
               setTimeout(function(){
                 status = 1
                 if(com1.SENTIDOENTRADA == 1){
@@ -244,9 +380,16 @@ if(com1.ENTRADA != ''){
       status = 0
       console.log("acesso nao utilizado")
       if(ultimoTicket > 0){
+        if(com1.INTEGRADOR == 1){  
+        console.log("No sqg Realizar a saida via api")    
+        Promise.all([setTicketSQG(ultimoTicket)])
+        .then(function (results) {
+          const perm  = results[0];   
+          console.log(perm)                                               
+      });  
+    }
         ultimoTicket = 0;
-        status = 0
-        console.log("No sqg Realizar a saida via api")
+        status = 0       
       }
     }
     })  
@@ -259,8 +402,9 @@ if(com1.ENTRADA != ''){
   })
   
   port.on('error', (err) => {
+    console.log("COM ENTRADA desconectado : " + err)
     Conecta()
-    console.log("COM ENTRADA desconectado : " + err)}
+    }
   )
   }
 
@@ -268,12 +412,13 @@ if(com1.ENTRADA != ''){
  
 }
 
+erro = 1
+function ConectaSAIDA(sentido){
 if(com1.SAIDA != '') {
-  erro = 1
-  function ConectaSAIDA(){
+ 
      
     var port2 = new SerialPort(com1.SAIDA, {
-      baudRate: 9600,
+      baudRate: 115200,
       dataBits: 8,
       parity: 'none',
       stopBits: 1,
@@ -289,35 +434,155 @@ if(com1.SAIDA != '') {
         }else{     
 
         console.log('conectado COM SAIDA')
+        port2.write('0;1;1;\r')
             
       }});
   
       parser2.on('data', function (data){
         console.log("recebeu algo COM SAIDA : " + data )  
-       
+        if(data === '0;12;' && com1.TIPO == 1 ){
+        //  status = 0
+          console.log("acesso nao utilizado")
+          port2.close(error => {console.log("COM SAIDA : " +error)})
+        } 
+        if(data === '0;10;' || data === '0;11;' ){
+          //  status = 0
+            console.log("acesso utilizado")
+            port2.close(error => {console.log("COM SAIDA : " +error)})
+          }
+         
       })  
+     // setTimeout(()=>{port2.close()},2000)
+     if(com1.TIPO == 2 ){
+      //  status = 0
+      setTimeout(()=>{ port2.close(error => {console.log("COM SAIDA : " +error)})},2000)
+      }  
+      
       
     port2.on('close', function(){
       console.log("COM SAIDA : Desconectado")
       port2.close(error => {console.log("COM SAIDA : " +error)})
+     
+    
+    })
+    
+    
+   }
+    
+  
+   
+
+    
+}
+
+if(com1.LEITOR != '') {
+  erro = 1
+  function ConectaLEITOR(){
+     
+    var portleitor = new SerialPort(com1.LEITOR, {
+      baudRate: 9600,
+      dataBits: 8,
+      parity: 'none',
+      stopBits: 1,
+      flowControl: false,
+      autoOpen:true
+    })   
+    const parserleitor = portleitor.pipe(new Readline({ delimiter: '\r' }))
+     console.log('conectando COM LEITOR ...')
+     portleitor.on('open',(err) => {
+        if (err) {
+          console.log("Erro ao Conectar COM LEITOR : " + err)
+          
+        }else{     
+        console.log('conectado COM LEITOR')            
+      }});
+  
+      parserleitor.on('data', function (data){
+        console.log("recebeu algo COM LEITOR : " + data )  
+        if(com1.INTEGRADOR == 1){  
+          console.log("No sqg Realizar a saida via api")    
+          Promise.all([setTicketSQG(data)])
+          .then(function (results) {
+            const perm  = results[0];   
+            console.log(perm)
+            if(com1.TIPO ==1){
+            if(perm.status.codigo== 400){
+              console.log("retorno ao caixa")
+              io.emit('serial:data',{
+                value: "Retorno"  })   
+            }else{
+              io.emit('serial:data',{
+                value: "Saida"  })   
+              if(com1.SENTIDOENTRADA == 1){
+                port2.write(liberaHorario)
+              }else if(com1.SENTIDOENTRADA == 2){
+                port2.write(liberaAntHorario)
+              }  
+            } 
+          }else{
+            if(perm[0].status == 'VL'){
+              io.emit('serial:data',{
+                value: "Saida"  }) 
+              if(com1.SENTIDOENTRADA == 1){
+                ConectaSAIDA("horario")
+            }else if(com1.SENTIDOENTRADA == 2){
+              ConectaSAIDA("anthorario")
+            }        
+
+            }else{
+              io.emit('serial:data',{
+                value: "Retorno"  }) 
+                console.log("retorno ao caixa")
+            } 
+          }                                             
+        });  
+      }  if(com1.INTEGRADOR == 2){
+
+        Promise.all([Imprimir.SaidaDatamaxi(data)])
+        .then(function (results) {   
+          console.log("resulta foi : " + results)
+          
+          if(results == 'LB'){
+            console.log("Saida Liberada")
+          }
+          if(results =='NL'){
+            console.log("retorne ao caixa")
+          }
+          if(results =='UT'){
+            console.log("Já utilizado")
+          }
+
+        })
+
+        
+        console.log("DATAMAXI Realizar a saida via api")
+        
+      }     
+      })  
+      
+      portleitor.on('close', function(){
+      console.log("COM LEITOR : Desconectado")
+      portleitor.close(error => {console.log("COM LEITOR : " +error)})
       ConectaSAIDA()  
     
     })
     
     
-    port2.on('error', (err) => {
+    portleitor.on('error', (err) => {
      
-      ConectaSAIDA()      
+      ConectaLEITOR()      
       
-        console.log("COM SAIDA desconectado : " + err)
+        console.log("COM LEITOR desconectado : " + err)
 
     
      } )}
     
   
-   ConectaSAIDA()
+   ConectaLEITOR()
 
+    
 }
+
 /* //const portaImpressora = new SerialPort('COM12')
 
 var portaImpressora = new SerialPort('COM12', {

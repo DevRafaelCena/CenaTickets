@@ -1,10 +1,11 @@
 {
     "ENTRADA": "COM8",
     "SENTIDOENTRADA": 1,
-    "SAIDA": "COM5",
+    "SAIDA": "",
     "SENTIDOSAIDA" : 2,
     "COMENTARIOScoms": "SENTIDO ENTRADA E SENTIDOSAIDA = 1- HORARIO , 2 ANTHORARIO",
     "IMPRESSORA" : "",
+    "LEITOR" : "COM4",
     "TEMPONOVAIMPRESSAO" : 5000,
     "TEMPOGIROHORARIO" : 10000,
     "TEMPOANTGIROHORARIO" : 5000,
@@ -12,9 +13,10 @@
      "INTEGRADOR" : 2,
      "PROTOCOLO"  : 1,   
      "COMENTARIOS" : "TIPO: 1 = CATRACA , 2 = CANCELA ---- INTEGRADOR: 1 = SQG , 2 = DATAMAXI ---- PROTOCOLO: 1= MZ5, 2 = RASPBERRY",
-     "API" : "http://IPSERVIDOR:PORTA/",
-     "USUARIO": "user",
-     "SENHA" : "senha"
+     "API" : "http://192.168.0.22:80/",
+     "COMENTARIOSAPI" : "SQG CATRACA = http://192.168.0.22:9187/, SQG -CANCELA =http://192.168.0.22:80 ",
+     "USUARIO": "usuario",
+     "SENHA" : 123456
 
 
   }

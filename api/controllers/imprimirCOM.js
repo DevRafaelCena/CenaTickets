@@ -1,44 +1,25 @@
 const axios = require('axios');
 const { json } = require('express');
+const serialPort = require('serialport')
 
-/* const escpos = require('escpos');
-escpos.SerialPort = require('escpos-serialport');
-const device = new escpos.SerialPort('COM12');
-
-const options = { encoding: "GB18030" /* default */ // } */
-// encoding is optional
-/* 
-const printer = new escpos.Printer(device, options);
-
-let imprimir = device.open(function(error){
-    printer
-    .font('a')
-    .align('ct')
-    .style('bu')
-    .size(1, 1)
-    .text('The quick brown fox jumps over the lazy dog')
-    .text('敏捷的棕色狐狸跳过懒狗')
-    .barcode('1234567', 'EAN8')
-    .table(["One", "Two", "Three"])
-    .tableCustom(
-      [
-        { text:"Left", align:"LEFT", width:0.33, style: 'B' },
-        { text:"Center", align:"CENTER", width:0.33},
-        { text:"Right", align:"RIGHT", width:0.33 }
-      ],
-      { encoding: 'cp857', size: [1, 1] } // Optional
-    )
-    .qrimage('https://github.com/song940/node-escpos', function(err){
-      this.cut();
-      this.close();
-    });
-  }); */
 
   const GerarTicket = {
     imprimir: () => {
+console.log("imprimindooo")
     
-       console.log("Imprimindo...")
-       return 
+     const port4 = new serialPort("COM9")
+
+     port4.on('open,', (err) =>{
+       if(err) console.log(err)
+       const imprimir = "tetando"
+       port4.write(imprimir)
+       port4.write(imprimir)
+       port4.write(imprimir)
+
+
+     })
+    
+      return true
 
     },
 
@@ -59,7 +40,7 @@ let imprimir = device.open(function(error){
               .up()
               .up()
             .ele('ROWDATA')
-              .ele('ROW', {'EVENTO': 'V','ID_COMANDA':'11151110'+numero ,'RowState':"4"})
+              .ele('ROW', {'EVENTO': 'V','ID_COMANDA':'11111110'+numero ,'RowState':"4"})
           
           
             .end({ pretty: true});
@@ -79,18 +60,54 @@ let imprimir = device.open(function(error){
           novacomanda(numero)
       
     },
-    SaidaDatamaxi: async(req,res) =>{
+    SaidaDatamaxi: async(numero) =>{
      // const id = req.params.id;
+     
+      ticket = numero.slice(-5)
+      console.log(ticket);
 
+          var C = 1
+          var D =1
+          var W = 1
+          var S = 1
+          var result ='inicio'
+    
      
           var fs = require("fs");
           var convert = require('xml-js');
+         
           //const config = fs.readFileSync("./Config.json" , "utf8", )
-          const config = fs.readFileSync("./comandasXML/W_CMD0110.xml","utf8", )
+         // const config = fs.readFileSync("./comandasXML/C_" + numero + '.xml',"utf8", )
+          if(!fs.existsSync('./comandasXML/C_' + ticket+ '.xml')) {
+          C = ''
+          }
+          if(!fs.existsSync('./comandasXML/S_CMD' + ticket+ '.xml')) {
+            S = ''
+            }
+            if(!fs.existsSync('./comandasXML/D_' + ticket+ '.xml')) {
+              D = ''
+              }
+              if(!fs.existsSync('./comandasXML/W_CMD' + ticket+ '.xml')) {
+                W = ''
+                }
 
-          result = convert.xml2js(config, {compact: true, spaces: 4});
+               if(D==1){
+                result = 'LB'
+               }else{
+                 if(C ==1){
+                   result = "NL"
+                 }
+                 else if(S == 1){
+                   result = "UT"
+                 }
+               }
+
+         
+             return result
+
+         // result = convert.xml2js(config, {compact: true, spaces: 4});
         
-          console.log(result.DATAPACKET.ROWDATA.ROW._attributes.EVENTO);
+         // console.log(result.DATAPACKET.ROWDATA.ROW._attributes.EVENTO);
 
 },
 
